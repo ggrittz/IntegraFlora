@@ -9,11 +9,17 @@ load("data-tmp/other.RData")
 
 # Join in a single list
 all_data <- c(gbif, reflora, jabot, splink, other)
-print(paste("Found", sum(sapply(all_data, nrow)), "records in", length(all_data), "files"))
+print(paste("Found", sum(vapply(all_data, nrow, 0)), "records in", length(all_data), "files"))
 
 # Organize into bite-sized chunks (size from config? ~500k?)
-chunk_size <- 1e5
-sizes <- sapply(all_data, nrow)
+chunk_size <- 4e5
+sizes <- vapply(all_data, nrow, 0)
+# Remove empty sets
+if(any(sizes == 0)) {
+    warning("There are empty sets in data. Check for errors.")
+    all_data <- all_data[sizes > 0]
+    sizes <- sizes[sizes > 0]
+}
 if(any(sizes > chunk_size)) {
     print("Splitting large files into chunks...")
     small <- all_data[sizes <= chunk_size]
