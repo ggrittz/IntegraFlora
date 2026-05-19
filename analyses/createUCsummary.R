@@ -1,4 +1,5 @@
 require(integraFlora)
+library(plantR)
 folder <- "data-input/Locations/info/"
 info_files <- read.csv("data-input/Locations/info/file_descriptions.csv", na.strings = c("", "NA"))
 filenames <- paste0("data-input/Locations/info/", info_files$arquivo)

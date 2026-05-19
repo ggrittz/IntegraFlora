@@ -1,4 +1,5 @@
 # Please read the README before running this
+library(plantR)
 devtools::load_all()
 
 # Prepare list of Locations
