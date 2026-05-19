@@ -4,7 +4,7 @@
 #' @export
 uc_abbrevs <- data.frame(
     short= c("APAM", "APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "FE", "PE", "PARNA", "PNM",
-             "EEC|ESEC","ESEX","RESEX","REBIO","REVIS|RVS","MONA","ZVS"),
+             "EEC|ESEC","ESEX|EEX","RESEX","REBIO","REVIS|RVS","MONA","ZVS"),
     long = c(
             "ÁREA DE PROTEÇÃO AMBIENTAL MARINHA",
             "ÁREA DE PROTEÇÃO AMBIENTAL",
