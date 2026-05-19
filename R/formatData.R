@@ -172,8 +172,21 @@ formatOccurrence <- function(x) {
         x$county <- NA
     }
 
+    if(any(!plantRMinimumNames %in% names(x))) {
+        warning(paste0("Missing required fields: ", paste(setdiff(plantRMinimumNames, names(x)), collapse=", "), ". This data will be removed"))
+        return(data.frame())
+    }
     x <- plantR::formatDwc(user_data = x)
     x <- selectDesiredFields(x)
     x$taxonRank <- normalizeTaxonRank(x$taxonRank)
     x
 }
+
+
+plantRMinimumNames <- c("institutionCode", "collectionCode",
+    "catalogNumber", "recordNumber", "recordedBy", "year",
+    "country", "stateProvince", "county", "municipality",
+    "locality", "decimalLatitude", "decimalLongitude",
+    "identifiedBy", "dateIdentified", "typeStatus", "family",
+    "scientificName", "scientificNameAuthorship")
+names(plantRMinimumNames) <- plantRMinimumNames
