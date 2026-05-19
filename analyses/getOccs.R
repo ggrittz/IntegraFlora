@@ -39,11 +39,11 @@ checkedLocations$slug <- toupper(slug(standardize_uc_name(checkedLocations$Nome_
 checkedLocations <- subset(checkedLocations, slug %in% ucs$slug)
 
 # add oficial names
-officialNames <- data.frame(Nome_UC = standardize_uc_name(ucs$name), Municipio="QUALQUER", Localidade = ucs$name, Relação = "Igual", Confiança = "Ouro", slug = ucs$slug)
+officialNames <- data.frame(Nome_UC = standardize_uc_name(ucs$name), Municipio="QUALQUER", Nome_Alternativo = ucs$name, Relação = "Igual", Confiança = "Ouro", slug = ucs$slug)
 LT <- rbind(checkedLocations, officialNames)
 
 # Generate string for regex grepl in locality data
-LT$uc_strings <- paste0("(",generate_uc_string(LT$Localidade),")")
+LT$uc_strings <- paste0("(",generate_uc_string(LT$Nome_Alternativo),")")
 # Summarize alternative names
 LT <- aggregate(LT$uc_strings, list(slug = LT$slug, Municipio = LT$Municipio, relationship = LT$Relação, confidenceLocality = LT$Confiança), function(x) paste(unique(x), collapse="|"))
 
@@ -53,22 +53,22 @@ LT <- subset(LT, confidenceLocality == "Ouro")
 # Pre-treated data from GBIF, REflora and JABOT
 # load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
 print("Loading occurrence data...")
-load("data-tmp/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
+load("data-tmp/corpus.rda")
 
 # Which occs are associated with each UC
 occs_plantr <- sapply(ucs$slug, function(s) {
     if(!s %in% loc3$slug) return(FALSE)
-    grepl(loc3[s, "x"], sp_deduped$loc.correct, perl=T)
+    grepl(loc3[s, "x"], corpus$loc.correct, perl=T)
 }, USE.NAMES = TRUE, simplify = FALSE)
 
 # Use regex to look for more occs
 occs_string_mun <- pairwiseMap(LT$x, LT$Municipio, function(str, mun) {
     if(mun=="QUALQUER") {
-        res <- searchLoc(str, sp_deduped)
+        res <- searchLoc(str, corpus)
     } else {
-        in_mun <- which(sp_deduped$municipality.correct == mun)
-        res <- rep(FALSE, nrow(sp_deduped))
-        res[in_mun] <- searchLoc(str, sp_deduped[in_mun, ])
+        in_mun <- which(corpus$municipality.correct == mun)
+        res <- rep(FALSE, nrow(corpus))
+        res[in_mun] <- searchLoc(str, corpus[in_mun, ])
     }
     res
 }, simplify = FALSE)
@@ -95,7 +95,7 @@ shapes <- shapes[order(shapes$slug), ]
 
 # Data with valid coordinates: either original coordinates or locality
 print("Selecting and correcting valid georeferenced points (original coords) ...")
-coords_original <- subset(sp_deduped, origin.coord == "coords_original")
+coords_original <- subset(corpus, origin.coord == "coords_original")
 if(nrow(coords_original) > 0) {
     coords_original <- st_as_sf(coords_original, coords = c("decimalLongitude.new", "decimalLatitude.new"))
     coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
@@ -107,7 +107,7 @@ if(nrow(coords_original) > 0) {
 }
 
 print("Selecting and correcting valid georeferenced points (gazet coords) ...")
-coords_gazet <- subset(sp_deduped, resolution.gazetteer == "locality")
+coords_gazet <- subset(corpus, resolution.gazetteer == "locality")
 if(nrow(coords_gazet) > 0) {
     coords_gazet <- st_as_sf(coords_gazet, coords = c("longitude.gazetteer", "latitude.gazetteer"))
     st_crs(coords_gazet) <- "EPSG:4674" # Assumes datum is SIRGAS 2000 (used by IBGE)
@@ -142,9 +142,9 @@ try({
 
     # Which records are in the gps shp
     rcs_intersect <- coords_original$recordID[points_ucs_original[[UC]]]
-    gps_original <- sp_deduped$recordID %in% rcs_intersect
+    gps_original <- corpus$recordID %in% rcs_intersect
     rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[UC]]]
-    gps_gazet <- sp_deduped$recordID %in% rcs_intersect
+    gps_gazet <- corpus$recordID %in% rcs_intersect
     gps_both <- gps_original & gps_gazet
 
     # Generate string for regex grepl in locality data
@@ -180,21 +180,21 @@ try({
     }
 
     # What criteria was used to select each record
-    sp_deduped$selectionCategory <- NA
-    sp_deduped$selectionCategory[gps_original] <- "coords_original"
-    sp_deduped$selectionCategory[gps_gazet] <- "coords_gazet"
-    sp_deduped$selectionCategory[gps_both] <-  "coords_both"
-    sp_deduped$selectionCategory[intersect_medium] <-  "intersect_medium"
-    sp_deduped$selectionCategory[intersect_high] <- "intersect_high"
-    sp_deduped$selectionCategory[plantr_exact] <- "plantr_exact"
-    sp_deduped$selectionCategory[locality_exact] <- "locality_exact"
+    corpus$selectionCategory <- NA
+    corpus$selectionCategory[gps_original] <- "coords_original"
+    corpus$selectionCategory[gps_gazet] <- "coords_gazet"
+    corpus$selectionCategory[gps_both] <-  "coords_both"
+    corpus$selectionCategory[intersect_medium] <-  "intersect_medium"
+    corpus$selectionCategory[intersect_high] <- "intersect_high"
+    corpus$selectionCategory[plantr_exact] <- "plantr_exact"
+    corpus$selectionCategory[locality_exact] <- "locality_exact"
 
     # What quality is the locality
-    sp_deduped$confidenceLocality <- "Low" # original GPS data
-    sp_deduped$confidenceLocality[intersect_medium | gps_gazet] <- "Medium"
-    sp_deduped$confidenceLocality[occs_uc_name | intersect_high | gps_both] <- "High"
+    corpus$confidenceLocality <- "Low" # original GPS data
+    corpus$confidenceLocality[intersect_medium | gps_gazet] <- "Medium"
+    corpus$confidenceLocality[occs_uc_name | intersect_high | gps_both] <- "High"
 
-    total <- sp_deduped[occs_total,]
+    total <- corpus[occs_total,]
 
     total$Nome_UC <- uc_data$name
     save(total, file=paste0("results/total/",nome_file,".rda"))
@@ -213,6 +213,6 @@ ucs$nome_file <- NULL
 ucs$slug <- NULL
 
 # Save summary
-write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
+write.csv(ucs, "results/summary_getOccs.csv", row.names=FALSE)
 summary(ucs==0)
 summary(ucs<20)
