@@ -1,4 +1,4 @@
-require(integraFlora)
+if(!require(integraFlora)) devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 

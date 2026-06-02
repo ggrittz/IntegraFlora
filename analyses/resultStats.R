@@ -1,4 +1,4 @@
-require(integraFlora)
+if(!require(integraFlora)) devtools::load_all()
 library(geobr)
 
 # Let's see what's going on with those stats
