@@ -1,4 +1,4 @@
-require(integraFlora)
+if(!require(integraFlora)) devtools::load_all()
 require(plantR)
 
 # Jabot data
