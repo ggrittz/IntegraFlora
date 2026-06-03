@@ -8,10 +8,10 @@ library(geobr)
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
-saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
+dt$recordID <- 1:nrow(dt) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
-valid_coords <- subset(saopaulo, origin.coord == "coords_original" | resolution.gazetteer == "locality" & !is.na(decimalLongitude.new))
+valid_coords <- subset(dt, origin.coord == "coords_original" | resolution.gazetteer == "locality" & !is.na(decimalLongitude.new))
 valid_coords <- subset(valid_coords,  !is.na(as.numeric(decimalLongitude.new)))
 table(valid_coords$geo.check)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
@@ -34,7 +34,7 @@ names(points_muns) <- shapes$name_muni
 sapply(points_muns, length)
 
 
-plotMun <- function(name, plot = TRUE, save = TRUE, refdf = saopaulo) {
+plotMun <- function(name, plot = TRUE, save = TRUE, refdf = dt) {
     gps_filter <- points_muns[[name]]
     filtered_gps <- valid_points[gps_filter,]
     # othermuns <- unique(filtered_gps$municipality.correct)

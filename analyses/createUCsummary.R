@@ -31,10 +31,15 @@ info_data_list <- lapply(1:nrow(info_files), function(i) {
             UC_ID = column_or_value(info_files$codigo[i], dt_raw),
             source = info_files$arquivo[i]
         )
+        dt$type <- shorten_uc_name(stringr::str_extract(dt$name, paste(uc_abbrevs$long, collapse = "|")))
+        dt$slug <- slug(dt$name)
+        # Remove unwanted types
+        dt <- subset(dt, !type %in% c("APAM", "APA", "ESEX"))
         if(anyDuplicated(dt$name)) {
             warning(paste(c("Found UCs with duplicated names:", shorten_uc_name(dt$name[duplicated(dt$name)])), collapse="\n"))
             dt <- dt[!duplicated(dt$name) & !is.na(dt$name),]
         }
+        dt <- addAdmin(formatLoc(dt))
         return(dt)
     },
     error = function(e) {
@@ -49,15 +54,15 @@ lapply(info_data_list, head)
 # Figure out which names are the same
 merge_info <- function(A, B) {
     # Detect repeated values
-    repA <- A$name %in% B$name
-    repB <- B$name %in% A$name
+    repA <- A$slug %in% B$slug
+    repB <- B$slug %in% A$slug
     # add selected elements from first source to result
     r <- A[repA,]
     # remove repeated entries
     A <- A[!repA,]
     B <- B[!repB,]
     # detect similar entries
-    strA <- paste0("^",generate_uc_string(A$name),"$")
+    strA <- paste0("^",generate_uc_string(A$name))
     matchA <- sapply(strA, function(s) {any(grepl(s, x=rmLatin(B$name), ignore.case=T))})
     if(any(matchA)) {
         # add positively matched to result

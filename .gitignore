@@ -33,3 +33,5 @@ results/total-treated/PE_SERRA_DO_MAR.csv
 *.xml
 plots/*
 *.png
+
+results/*
