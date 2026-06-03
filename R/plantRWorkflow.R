@@ -30,7 +30,7 @@ plantRWorkflow <- function(x) {
     # using the World Flora Online
     # x <- tryAgain(x, not_found, getTaxonId, db = wfoNames)
     # using the World Checklist of Vascular Plants
-    x <- tryAgain(x, not_found, getTaxonId, db = wcvpNames)
+    # x <- tryAgain(x, not_found, getTaxonId, db = wcvpNames)
 
     # Save unmatched taxons
     nf <- x[x$tax.notes == "not found" | !startsWith(x$id, "bfo"), ]
