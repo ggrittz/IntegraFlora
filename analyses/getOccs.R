@@ -31,7 +31,7 @@ loc2 <- aggregate(LT$loc.extra, list(Nome_UC = LT$uc_name), function(x) paste(un
 LT <- rbind(loc1, loc2)
 tail(LT)
 loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collapse="|"))
-rownames(loc3) <- slug(loc3$Nome_UC)
+rownames(loc3) <- loc3$slug <- slug(loc3$Nome_UC)
 
 # Read table of alternative names and locality names
 checkedLocations <- read.csv("results/locations/checkedLocations.csv")
@@ -54,8 +54,10 @@ LT <- subset(LT, confidenceLocality == "Ouro")
 # load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
 print("Loading occurrence data...")
 load("data-tmp/corpus.rda")
+if(!"recordID" %in% names(corpus)) corpus$recordID <- 1:nrow(corpus)
 
 # Which occs are associated with each UC
+print("Searching in locs...")
 occs_plantr <- sapply(ucs$slug, function(s) {
     if(!s %in% loc3$slug) return(FALSE)
     grepl(loc3[s, "x"], corpus$loc.correct, perl=T)
@@ -104,6 +106,7 @@ if(nrow(coords_original) > 0) {
     names(points_ucs_original) <- shapes$slug
 } else {
     points_ucs_original <- as.list(rep(FALSE, nrow(shapes)))
+    names(points_ucs_original) <- shapes$slug
 }
 
 print("Selecting and correcting valid georeferenced points (gazet coords) ...")
@@ -132,7 +135,7 @@ intersecUCs <- subset(intersecUCs, slug2 %in% ucs$slug)
 
 ucs$nome_file <- ucs$slug
 for(i in 1:sample_size){
-try({
+tryCatch({
 
     uc_data <- ucs[i,]
     print("Getting data for UC:")
@@ -141,10 +144,14 @@ try({
     nome_file <- uc_data$nome_file
 
     # Which records are in the gps shp
-    rcs_intersect <- coords_original$recordID[points_ucs_original[[UC]]]
-    gps_original <- corpus$recordID %in% rcs_intersect
-    rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[UC]]]
-    gps_gazet <- corpus$recordID %in% rcs_intersect
+    if(any(points_ucs_original[[UC]])) {
+        rcs_intersect <- coords_original$recordID[points_ucs_original[[UC]]]
+        gps_original <- corpus$recordID %in% rcs_intersect
+    } else gps_original <- FALSE
+    if(any(points_ucs_gazet[[UC]])) {
+        rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[UC]]]
+        gps_gazet <- corpus$recordID %in% rcs_intersect
+    } else gps_gazet <- FALSE
     gps_both <- gps_original & gps_gazet
 
     # Generate string for regex grepl in locality data
@@ -206,6 +213,8 @@ try({
     ucs[i,]$NumPrata <- sum(total$confidenceLocality=="Medium")
     ucs[i,]$NumBronze <- sum(total$confidenceLocality=="Low")
 
+}, error = function(e) {
+    warning(e)
 })
 }
 
