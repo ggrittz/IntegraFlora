@@ -16,6 +16,7 @@ Imports:
     geobr,
     parallel,
     bit64,
+    rvest,
     measurements
 Suggests:
     rmarkdown,
