@@ -2,12 +2,15 @@
 top_records <- function(x, n = 5) {
     # Get best specimen/identification combo
     x <- x[order(x$ConfiançaLoc, x$ConfiançaID, !is.na(x$Imagens), as.numeric(x$AnoColeta), as.numeric(x$AnoID), na.last=F, decreasing = T),]
-    res <- split(x, duplicated(x$Táxon_completo))
+    # Split data into best record and not-best
+    res <- split(x, factor(duplicated(x$Táxon_completo), levels=c(T,F)))
+    # Select up to five non-best extra records
     sp <- split(res[[2]], res[[2]]$Táxon_completo)
     sp <- lapply(sp, function(y) {
         if(nrow(y) > n) return(y[1:n,])
         else return(y)})
     res[[2]] <- do.call(rbind, sp)
+    # return
     res
 }
 

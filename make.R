@@ -7,8 +7,6 @@ source("config.R")
 
 # Prepare list of Locations
 source("analyses/createUCsummary.R")
-# Make gazetteer
-source("analyses/createUCgazetteer.R")
 
 # Format data from each source
 source("analyses/formatData/GBIF.R")

@@ -14,7 +14,7 @@ ucs <- done[has_records, ]
 
 # Select a subset of UCs (for testing)
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
-sample_size = nrow(ucs)
+(sample_size = nrow(ucs))
 
 # If using sample, I want to remove sample from done
 done <- subset(done, !name %in% ucs$name)
