@@ -2,6 +2,9 @@
 library(plantR)
 devtools::load_all()
 
+# Load user options
+source("config.R")
+
 # Prepare list of Locations
 source("analyses/createUCsummary.R")
 # Make gazetteer
