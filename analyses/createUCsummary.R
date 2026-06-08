@@ -103,7 +103,7 @@ dt <- dt[order(dt$name),]
 
 dtl <- dt
 dtl$locality <- dt$name
-dtl <- fixLocation(dtl, subset = F)
+dtl <- fixLocation(dtl)
 dt$country <- ifelse(is.na(dtl$country.correct), dt$country, dtl$country.correct)
 dt$stateProvince <- ifelse(is.na(dtl$stateProvince.correct), dt$stateProvince, dtl$stateProvince.correct)
 dt$municipality <- ifelse(is.na(dtl$municipality.correct), dt$municipality, dtl$municipality.correct)
