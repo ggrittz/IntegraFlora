@@ -39,7 +39,6 @@ info_data_list <- lapply(1:nrow(info_files), function(i) {
             warning(paste(c("Found UCs with duplicated names:", shorten_uc_name(dt$name[duplicated(dt$name)])), collapse="\n"))
             dt <- dt[!duplicated(dt$name) & !is.na(dt$name),]
         }
-        dt <- addAdmin(formatLoc(dt))
         return(dt)
     },
     error = function(e) {
@@ -71,7 +70,7 @@ merge_info <- function(A, B) {
         A <- A[!matchA,]
 
         # remove repeated from the other set
-        whichA <- sapply(strA[matchA], grep, x=rmLatin(B$name), ignore.case=T)
+        whichA <- unlist(sapply(strA[matchA], grep, x=rmLatin(B$name), ignore.case=T))
         B <- B[-whichA,]
     }
     # detect similar entries (converse)
@@ -84,7 +83,7 @@ merge_info <- function(A, B) {
         B <- B[!matchB,]
 
         # remove repeated from the other set
-        whichB <- sapply(strB[matchB], grep, x=rmLatin(A$name), ignore.case=T)
+        whichB <- unlist(sapply(strB[matchB], grep, x=rmLatin(A$name), ignore.case=T))
         A <- A[-whichB,]
     }
     r <- rbind(r, A, B)
@@ -101,4 +100,13 @@ nrow(dt)
 tab(dt$source)
 
 dt <- dt[order(dt$name),]
+
+dtl <- dt
+dtl$locality <- dt$name
+dtl <- fixLocation(dtl, subset = F)
+dt$country <- ifelse(is.na(dtl$country.correct), dt$country, dtl$country.correct)
+dt$stateProvince <- ifelse(is.na(dtl$stateProvince.correct), dt$stateProvince, dtl$stateProvince.correct)
+dt$municipality <- ifelse(is.na(dtl$municipality.correct), dt$municipality, dtl$municipality.correct)
+
+head(dt)
 write.csv(dt, "data-input/Locations/info/Summary.csv", row.names=F)
