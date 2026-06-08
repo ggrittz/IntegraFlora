@@ -45,7 +45,7 @@ try({
     Nome_UC <- uc_data$name
     print("Getting data for UC:")
     print(Nome_UC)
-    nome_file <- uc_data$nome_file
+    nome_file <- slug(uc_data$name)
 
     load(file=paste0("results/total/",nome_file,".rda"))
 
@@ -95,8 +95,8 @@ try({
 
     # Get best records for each taxon
     tops <- top_records(matched)
-    top <- tops[[1]]
-    bottom <- tops[[2]]
+    top <- tops$top
+    bottom <- tops$extra
 
     print(paste("Found",nrow(top),"taxons."))
     ucs[i,]$NumTaxons <- nrow(top)
