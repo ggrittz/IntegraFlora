@@ -14,7 +14,9 @@ plantRWorkflow <- function(x) {
     print("Formatting locs")
     x <- formatLoc(x)
 
-    x <- fixLocation(x)
+    if(!exists("country")) country <- "Brazil"
+    if(!exists("stateProvince")) stateProvince <- "stateProvince"
+    x <- fixLocation(x, country, stateProvince)
 
     # Treat gps data
     print("Formatting coords...")

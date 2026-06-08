@@ -1,5 +1,5 @@
 
-fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo") {
+fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo", subset = TRUE) {
 
     print(paste("Found", nrow(dt), "records."))
 
@@ -7,9 +7,6 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo") {
     print("Loading municipality gazetteer...")
     munis <- read.csv("results/locations/municipalityGazetteer.csv")
     gazet = rbind(plantR:::gazetteer, munis)
-
-    dt$municipality <- sub("([ ,\\.^])sta\\.","\\1santa", dt$municipality, ignore.case = T)
-    dt$locality <- sub("([ ,\\.^])sta\\.","\\1santa", dt$locality, ignore.case = T)
 
     # load complementary gazetteer
     print("Loading extra gazetteer...")
@@ -21,6 +18,10 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo") {
     gazet <- rbind(gazet, extra_gazet_filled)
 
     print("Formatting loc...")
+    if(!"locality" %in% names(dt)) dt$locality <- NA
+    dt$municipality <- sub("([ ,\\.^])sta\\.","\\1santa", dt$municipality, ignore.case = T)
+    dt$locality <- sub("([ ,\\.^])sta\\.","\\1santa", dt$locality, ignore.case = T)
+
     dt$country <- remove_spaces(dt$country)
     dt$stateProvince <- remove_spaces(dt$stateProvince)
     dt$municipality <- remove_spaces(dt$municipality)
@@ -198,18 +199,21 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo") {
 
     dt <- tryAgain(dt, function(x) x$loc == "brazil_NA_sao paulo" & !is.na(x$locality.new), finLoc, function(x) x$resolution.gazetteer=="locality")
 
-    print("Subsetting to country...")
     dt <- addAdmin(dt)
 
-    tab(dt$country.correct)
-    tab(dt$country.new[is.na(dt$country.correct)])
-    dt <- subset(dt, country.correct == country)
+    if(subset) {
+        print("Subsetting to country...")
 
-    # noCountry <- subset(dt, is.na(country.correct))
-    tab(dt$stateProvince.correct)
-    tab(dt$municipality.new[is.na(dt$stateProvince.correct)])
-    print("Subsetting to state...")
-    dt <- subset(dt, stateProvince.correct == stateProvince | is.na(stateProvince.correct))
+        tab(dt$country.correct)
+        tab(dt$country.new[is.na(dt$country.correct)])
+        dt <- subset(dt, country.correct == country)
+
+        # noCountry <- subset(dt, is.na(country.correct))
+        tab(dt$stateProvince.correct)
+        tab(dt$municipality.new[is.na(dt$stateProvince.correct)])
+        print("Subsetting to state...")
+        dt <- subset(dt, stateProvince.correct == stateProvince | is.na(stateProvince.correct))
+    }
     # sort(table(dt$stateProvince.new, useNA="always"))
     # table(dt$stateProvince.correct, useNA="always")
     # table(dt$municipality.correct, useNA="always")
