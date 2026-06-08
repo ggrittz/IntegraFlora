@@ -54,7 +54,7 @@ save(all_data, file="data-tmp/all_data.RData")
 
 # Apply workflow
 print("Treating data...")
-treated_data <- lapply(all_data, plantRWorkflow)
+treated_data <- lapply(all_data, plantRWorkflow, subsetToProvince = T)
 save(treated_data, file="data-tmp/treated_data.RData")
 
 # Join
@@ -64,4 +64,5 @@ for(x in treated_data[2:length(treated_data)]) {
     corpus <- dplyr::bind_rows(corpus, x)
 }
 
+print("Saving...")
 save(corpus, file="data-tmp/corpus-full.rda")

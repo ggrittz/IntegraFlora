@@ -8,30 +8,28 @@ library(sf)
 # Data about UCs from CNUC
 print("Loading conservation units data...")
 ucs <- read.csv("data-input/Locations/info/Summary.csv")
-ucs <- ucs[grep(stateProvince, ucs$stateProvince), c("name")]
-# ucs <- read.csv("data-input/UCs.csv")
+ucs <- ucs[grep(STATEPROVINCE, ucs$stateProvince),]
 
 # Make a summary table
 ucs$NumRecords <- NA
+ucs <- ucs[,c("name", "slug", "NumRecords")]
 ucs$NumOuro <- NA
 ucs$NumPrata <- NA
 ucs$NumBronze <- NA
 
-# Standardize names and reorder
-ucs$name <- standardize_uc_name(ucs$name)
-ucs$slug <- slug(ucs$name)
-ucs <- ucs[order(ucs$name), ]
-
 # Lookup what are the names of UCs in plantR
 LT <- read.csv("results/locations/uc_locstrings.csv")
-LT[LT==""] <- NA
-loc1 <- aggregate(LT$loc.correct, list(Nome_UC = LT$uc_name), function(x) paste(x, collapse="|"))
-LT <- na.omit(LT)
-loc2 <- aggregate(LT$loc.extra, list(Nome_UC = LT$uc_name), function(x) paste(unique(x), collapse="|"))
-LT <- rbind(loc1, loc2)
-tail(LT)
-loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collapse="|"))
-rownames(loc3) <- loc3$slug <- slug(loc3$Nome_UC)
+LT <- LT[LT$uc_name %in% ucs$name, ]
+if (nrow(LT) > 0) {
+    LT[LT==""] <- NA
+    loc1 <- aggregate(LT$loc.correct, list(Nome_UC = LT$uc_name), function(x) paste(x, collapse="|"))
+    LT <- na.omit(LT)
+    loc2 <- aggregate(LT$loc.extra, list(Nome_UC = LT$uc_name), function(x) paste(unique(x), collapse="|"))
+    LT <- rbind(loc1, loc2)
+    tail(LT)
+    loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collapse="|"))
+    rownames(loc3) <- loc3$slug <- slug(loc3$Nome_UC)
+} else {loc3 <- list(slug="")}
 
 # Read table of alternative names and locality names
 checkedLocations <- read.csv("results/locations/checkedLocations.csv")
@@ -55,15 +53,21 @@ LT <- subset(LT, confidenceLocality == "Ouro")
 print("Loading occurrence data...")
 load("data-tmp/corpus.rda")
 if(!"recordID" %in% names(corpus)) corpus$recordID <- 1:nrow(corpus)
+if(exists("COUNTRY")) corpus <- subset(corpus, country.correct %in% COUNTRY)
+if(exists("STATEPROVINCE")) corpus <- subset(corpus, stateProvince.correct %in% STATEPROVINCE | is.na(stateProvince.correct))
 
 # Which occs are associated with each UC
-print("Searching in locs...")
+print("Searching with plantR locs...")
 occs_plantr <- sapply(ucs$slug, function(s) {
-    if(!s %in% loc3$slug) return(FALSE)
-    grepl(loc3[s, "x"], corpus$loc.correct, perl=T)
+    if(!s %in% loc3$slug) {
+        return(FALSE)
+    } else {
+        grepl(loc3[s, "x"], corpus$loc.correct, perl=T)
+    }
 }, USE.NAMES = TRUE, simplify = FALSE)
 
 # Use regex to look for more occs
+print("Searching with regex...")
 occs_string_mun <- pairwiseMap(LT$x, LT$Municipio, function(str, mun) {
     if(mun=="QUALQUER") {
         res <- searchLoc(str, corpus)
@@ -79,9 +83,6 @@ occs_string <- sapply(unique(LT$slug), function(n) {Reduce("|", occs_string_mun[
 # Combine matches from occs_plantr and occs_string
 occs_locality <- pairwiseMap(occs_plantr[names(occs_string)], occs_string, FUN=function(x,y) {x|y})
 names(occs_locality) <- names(occs_string)
-
-# Remove loc.correct column
-ucs$loc.correct <- NULL
 
 # Select a subset of UCs (for testing)
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
@@ -133,7 +134,6 @@ intersecUCs$slug2 <- slug(standardize_uc_name(intersecUCs$outra_uc))
 
 intersecUCs <- subset(intersecUCs, slug2 %in% ucs$slug)
 
-ucs$nome_file <- ucs$slug
 for(i in 1:sample_size){
 tryCatch({
 
@@ -141,7 +141,7 @@ tryCatch({
     print("Getting data for UC:")
     print(uc_data[1])
     UC <- uc_data$slug
-    nome_file <- uc_data$nome_file
+    nome_file <- UC
 
     # Which records are in the gps shp
     if(any(points_ucs_original[[UC]])) {
@@ -181,7 +181,7 @@ tryCatch({
         print("No records found for CU:")
         print(UC)
 
-        ucs[i,2:ncol(ucs)] <- 0
+        ucs[i,3:ncol(ucs)] <- 0
 
         next
     }

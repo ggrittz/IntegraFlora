@@ -1,5 +1,5 @@
 
-fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo", subset = TRUE) {
+fixLocation <- function(dt, selectedCountry = "Brazil") {
 
     print(paste("Found", nrow(dt), "records."))
 
@@ -87,7 +87,7 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo", su
     x$stateProvince.new<- fix_sp(x$stateProvince.new)
     x$stateProvince.new<- gsub("sao paulo sp?","sao paulo",x$stateProvince.new)
     x$stateProvince.new<- remove_spaces(x$stateProvince.new)
-    if(country == "Brazil") {
+    if(selectedCountry == "Brazil") {
         x$stateProvince.new<- gsub("san pablo","sao paulo",x$stateProvince.new, fixed = TRUE)
         x$stateProvince.new<- gsub("sao paolo","sao paulo",x$stateProvince.new, fixed = TRUE)
         x$stateProvince.new[grepl("sao paulo",x$stateProvince.new, fixed = TRUE)] <- "sao paulo"
@@ -110,53 +110,53 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo", su
     })
 
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer %in% c("country", "no_info"), function(x) {
-    x$municipality.new[grepl("ubatuba",x$stateProvince.new)] <- "ubatuba"
-    x$locality.new[grepl("ubatuba",x$stateProvince.new)] <- "ilha anchieta"
-    towns <- grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim",x$stateProvince.new) & is.na(x$municipality.new)
-    x$municipality.new[towns] <- x$stateProvince[towns]
-    x$stateProvince.new[towns] <- "sao paulo"
-    x$country.new[towns] <- "brazil"
-    x$stateProvince.new[x$stateProvince.new=="sp"] <- "sao paulo"
+        x$municipality.new[grepl("ubatuba",x$stateProvince.new)] <- "ubatuba"
+        x$locality.new[grepl("ubatuba",x$stateProvince.new)] <- "ilha anchieta"
+        towns <- grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim",x$stateProvince.new) & is.na(x$municipality.new)
+        x$municipality.new[towns] <- x$stateProvince[towns]
+        x$stateProvince.new[towns] <- "sao paulo"
+        x$country.new[towns] <- "brazil"
+        x$stateProvince.new[x$stateProvince.new=="sp"] <- "sao paulo"
 
-    x$stateProvince.new[grepl("sao paulo", x$municipality.new)] <- "sao paulo"
-    stateStr <- "state of sao paulo|sao paulo state|&sao paulo|estado de sao paulo|sao paulo -|estado sao paulo"
-    x$municipality.new <- gsub(stateStr,"",x$municipality.new)
-    x$municipality.new <- gsub(" -|- "," ",x$municipality.new)
-    x$municipality.new<- remove_punct(x$municipality.new)
-    x$municipality.new<- remove_spaces(x$municipality.new)
+        x$stateProvince.new[grepl("sao paulo", x$municipality.new)] <- "sao paulo"
+        stateStr <- "state of sao paulo|sao paulo state|&sao paulo|estado de sao paulo|sao paulo -|estado sao paulo"
+        x$municipality.new <- gsub(stateStr,"",x$municipality.new)
+        x$municipality.new <- gsub(" -|- "," ",x$municipality.new)
+        x$municipality.new<- remove_punct(x$municipality.new)
+        x$municipality.new<- remove_spaces(x$municipality.new)
 
-    x <- finLoc(x, gazet = gazet)
+        x <- finLoc(x, gazet = gazet)
     })
 
     munis <- read.csv("results/locations/uniqueMunicipalities.csv")
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer == "country" & !is.na(x$municipality.new), function(x) {
-    # find state name in municipality name
-    x$stateProvince.new <- munis$stateProvince.new[match(x$municipality.new, munis$municipality.new)]
+        # find state name in municipality name
+        x$stateProvince.new <- munis$stateProvince.new[match(x$municipality.new, munis$municipality.new)]
 
-    x <- finLoc(x, gazet = gazet)
+        x <- finLoc(x, gazet = gazet)
     })
 
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer == "country" & is.na(x$municipality), function(x) {
-    # find state name in state name
-    muni <- tolower(rmLatin(x$stateProvince))
-    x$stateProvince.new <- munis$stateProvince.new[match(muni, munis$municipality.new)]
-    x$municipality.new <- muni
+        # find state name in state name
+        muni <- tolower(rmLatin(x$stateProvince))
+        x$stateProvince.new <- munis$stateProvince.new[match(muni, munis$municipality.new)]
+        x$municipality.new <- muni
 
-    x <- finLoc(x, gazet = gazet)
+        x <- finLoc(x, gazet = gazet)
     })
 
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer == "country" & !is.na(x$municipality.new), function(x) {
-    # find state name in municipality name
-    x$municipality.new <- fix_sp(x$municipality.new)
-    x$stateProvince.new[grepl("sao paulo", x$municipality.new)] <- "sao paulo"
-    stateStr <- "state of sao paulo|sao paulo state|&sao paulo|estado de sao paulo|sao paulo -|estado sao paulo"
-    x$municipality.new <- gsub(stateStr,"",x$municipality.new)
-    x$municipality.new <- gsub(" -|- "," ",x$municipality.new)
-    x$municipality.new<- remove_punct(x$municipality.new)
-    x$municipality.new<- remove_spaces(x$municipality.new)
-    x$stateProvince.new <- munis$name_state_norm[match(x$municipality.new, tolower(rmLatin(munis$name_muni)))]
+        # find state name in municipality name
+        x$municipality.new <- fix_sp(x$municipality.new)
+        x$stateProvince.new[grepl("sao paulo", x$municipality.new)] <- "sao paulo"
+        stateStr <- "state of sao paulo|sao paulo state|&sao paulo|estado de sao paulo|sao paulo -|estado sao paulo"
+        x$municipality.new <- gsub(stateStr,"",x$municipality.new)
+        x$municipality.new <- gsub(" -|- "," ",x$municipality.new)
+        x$municipality.new<- remove_punct(x$municipality.new)
+        x$municipality.new<- remove_spaces(x$municipality.new)
+        x$stateProvince.new <- munis$name_state_norm[match(x$municipality.new, tolower(rmLatin(munis$name_muni)))]
 
-    x <- finLoc(x, gazet = gazet)
+        x <- finLoc(x, gazet = gazet)
     })
 
     # get admin names
@@ -165,58 +165,41 @@ fixLocation <- function(dt, country = "Brazil", stateProvince = "São Paulo", su
     print("Fixing municipality name...")
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer == "state" & !is.na(x$stateProvince.correct), function(x) {
 
-    print(table(x$resolution.gazetteer))
-    country <- x$country
-    x$country <- x$country.correct
-    state <- x$stateProvince
-    x$stateProvince <- x$stateProvince.correct
-    x <- formatLoc(x, gazet = gazet)
-    # Return verbatim info to original
-    x$stateProvince <- state
-    x$country <- country
-    print(table(x$resolution.gazetteer))
-    x
+        print(table(x$resolution.gazetteer))
+        country <- x$country
+        x$country <- x$country.correct
+        state <- x$stateProvince
+        x$stateProvince <- x$stateProvince.correct
+        x <- formatLoc(x, gazet = gazet)
+        # Return verbatim info to original
+        x$stateProvince <- state
+        x$country <- country
+        print(table(x$resolution.gazetteer))
+        x
     }, success_condition = function(x) x$resolution.gazetteer %in% c("county","locality"), label = "Using correct state name")
 
     print("Fixing locality name...")
     dt <- tryAgain(dt, function(x) x$resolution.gazetteer == "county" & !is.na(x$municipality.correct), function(x) {
 
-    print(table(x$resolution.gazetteer))
-    country <- x$country
-    x$country <- x$country.correct
-    state <- x$stateProvince
-    x$stateProvince <- x$stateProvince.correct
-    county <- x$municipality
-    x$municipality <- x$municipality.correct
-    x <- formatLoc(x, gazet = gazet)
-    # Return verbatim info to original
-    x$country <- country
-    x$stateProvince <- state
-    x$municipality <- county
-    print(table(x$resolution.gazetteer))
-    x
+        print(table(x$resolution.gazetteer))
+        country <- x$country
+        x$country <- x$country.correct
+        state <- x$stateProvince
+        x$stateProvince <- x$stateProvince.correct
+        county <- x$municipality
+        x$municipality <- x$municipality.correct
+        x <- formatLoc(x, gazet = gazet)
+        # Return verbatim info to original
+        x$country <- country
+        x$stateProvince <- state
+        x$municipality <- county
+        print(table(x$resolution.gazetteer))
+        x
     }, success_condition = function(x) x$resolution.gazetteer %in% c("locality"), label = "Using correct state and municipality name")
 
     dt <- tryAgain(dt, function(x) x$loc == "brazil_NA_sao paulo" & !is.na(x$locality.new), finLoc, function(x) x$resolution.gazetteer=="locality")
 
     dt <- addAdmin(dt)
 
-    if(subset) {
-        print("Subsetting to country...")
-
-        tab(dt$country.correct)
-        tab(dt$country.new[is.na(dt$country.correct)])
-        dt <- subset(dt, country.correct == country)
-
-        # noCountry <- subset(dt, is.na(country.correct))
-        tab(dt$stateProvince.correct)
-        tab(dt$municipality.new[is.na(dt$stateProvince.correct)])
-        print("Subsetting to state...")
-        dt <- subset(dt, stateProvince.correct == stateProvince | is.na(stateProvince.correct))
-    }
-    # sort(table(dt$stateProvince.new, useNA="always"))
-    # table(dt$stateProvince.correct, useNA="always")
-    # table(dt$municipality.correct, useNA="always")
-    # dim(dt)
     return(dt)
 }

@@ -1,5 +1,5 @@
 
-plantRWorkflow <- function(x) {
+plantRWorkflow <- function(x, subsetToProvince = FALSE) {
     # Standardize missing information
     x[x==""] <- NA
 
@@ -12,11 +12,23 @@ plantRWorkflow <- function(x) {
     x <- formatOcc(x, noNumb = NA, noYear = NA, noName = NA)
 
     print("Formatting locs")
-    x <- formatLoc(x)
+    if(!exists("COUNTRY")) COUNTRY <- "Brazil"
+    if(!exists("STATEPROVINCE")) STATEPROVINCE <- "São Paulo"
+    x <- fixLocation(x)
 
-    if(!exists("country")) country <- "Brazil"
-    if(!exists("stateProvince")) stateProvince <- "stateProvince"
-    x <- fixLocation(x, country, stateProvince)
+    if(subsetToProvince) {
+        print("Subsetting to country...")
+
+        tab(x$country.correct)
+        tab(x$country.new[is.na(x$country.correct)])
+        x <- subset(x, country.correct == COUNTRY)
+
+        # noCountry <- subset(dt, is.na(country.correct))
+        tab(x$stateProvince.correct)
+        tab(x$municipality.new[is.na(x$stateProvince.correct)])
+        print("Subsetting to state...")
+        x <- subset(x, stateProvince.correct == STATEPROVINCE | is.na(stateProvince.correct))
+    }
 
     # Treat gps data
     print("Formatting coords...")
