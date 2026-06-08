@@ -12,7 +12,8 @@ all_data <- c(gbif, reflora, jabot, splink, other)
 print(paste("Found", sum(vapply(all_data, nrow, 0)), "records in", length(all_data), "files"))
 
 # Organize into bite-sized chunks (size from config? ~500k?)
-chunk_size <- 4e5
+if(!exists("chunk_size")) chunk_size<- 4e5
+
 sizes <- vapply(all_data, nrow, 0)
 # Remove empty sets
 if(any(sizes == 0)) {

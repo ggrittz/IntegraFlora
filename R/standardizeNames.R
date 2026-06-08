@@ -17,6 +17,9 @@ standardize_uc_name <- function(x) {
     x <- sub("SITIO", "SÍTIO", x, fixed = T)
     # Remove problematic characters
     x <- gsub("\"", "", x, fixed = T)
+    x <- gsub("“", "", x, fixed = T)
+    x <- gsub("”", "", x, fixed = T)
+    x <- gsub(".", "", x, fixed = T)
     x <- gsub("’", "'", x, fixed = T)
     x <- gsub("\\s", " ", x, perl = T)
     x <- gsub(",.*","", x, perl = T)

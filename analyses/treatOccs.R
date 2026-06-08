@@ -4,7 +4,7 @@ library(stringr)
 library(florabr)
 
 # Data from previous runs
-done <- read.csv("results/summary_multilist.csv")
+done <- read.csv("results/summary_getOccs.csv")
 
 # Select for treating: one or more records
 has_records <- done$NumRecords > 0
@@ -32,8 +32,11 @@ ucs$NumLatao <- NA
 ucs$NumNoMatch <- NA
 
 # Load information for brazilian flora
-# bf <- get_florabr(output_dir = "data-tmp")
-bf <- load_florabr(data_dir = "data-tmp")
+if (length(list.files("data-tmp/florabr","*.rds", recursive = T))>0) {
+    bf <- load_florabr(data_dir = "data-tmp/florabr")
+} else {
+    bf <- get_florabr(output_dir = "data-tmp/florabr")
+}
 
 for(i in 1:sample_size){
 try({
