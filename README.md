@@ -101,3 +101,14 @@ O critério de confiança na identificação depende da especialização do iden
 ## Apoio
 
 Esta ferramenta foi financiada pela FAPESP como parte do projeto 2024/07747-9 - "Aprimoramento e integração de bases de dados geoespaciais sobre a flora paulista", filiado ao Biota Síntese.
+
+### Colaboradores
+
+Mali Oz C. Salles (autor correspondente)
+Renato A. F. Lima
+Renata Ivanauskas
+Thuane Bochorny
+Guilherme S. Grittz
+Pablo Pains
+Andre M. Pereira
+Marisa Domingos
