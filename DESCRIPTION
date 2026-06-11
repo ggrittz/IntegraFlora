@@ -1,6 +1,6 @@
 Package: integraFlora
 Title: Build species list for any conservation unit in Brazil
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(person("Mali Oz", "Salles", email = "malicsalles@gmail.com", role = c("aut", "cre")))
 Description: Tool to create species lists for conservation units in Brazil, from data found in GBIF, SpeciesLink, Reflora and Jabot
 Depends: R (>= 4.10)
