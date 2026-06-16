@@ -77,7 +77,7 @@ formatGBIF <- function(gbif) {
 #' Specific formatting for Jabot data
 #'
 #' @param x A data.frame (output from readJabot)
-#' @output A data.frame formatted with formatDwc
+#' @return A data.frame formatted with formatDwc
 formatJabot <- function(x) {
     # Fix names
     x <- consolidateCase(x)
@@ -108,7 +108,7 @@ formatJabot <- function(x) {
 #' Specific formatting for Reflora data
 #'
 #' @param x A data.frame (output from readReflora)
-#' @output A data.frame formatted with formatDwc
+#' @return A data.frame formatted with formatDwc
 formatReflora <- function(x) {
     x <- parseReflora(x)
 
@@ -129,7 +129,7 @@ formatReflora <- function(x) {
 #' Specific formatting for SpLink data
 #'
 #' @param x A data.frame (output from readSpLink)
-#' @output A data.frame formatted with formatDwc
+#' @return A data.frame formatted with formatDwc
 formatSpLink <- function(x) {
     # Normalize basisOfRecord
     table(x$basisofrecord, useNA="always")
@@ -155,7 +155,7 @@ formatSpLink <- function(x) {
 #' Generic formatting for darwinCore data
 #'
 #' @param x A data.frame (output from readOccurrence)
-#' @output A data.frame formatted with formatDwc
+#' @return A data.frame formatted with formatDwc
 formatOccurrence <- function(x) {
     # Fix names
     x <- consolidateCase(x)

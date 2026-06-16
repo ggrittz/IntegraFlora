@@ -4,7 +4,6 @@
 #'
 #' @author Mali Oz Salles and Pablo Melo
 #'
-#' @importFrom measurements conv_unit
 #' @importFrom dplyr mutate
 #'
 #' @encoding UTF-8
