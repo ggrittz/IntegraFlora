@@ -1,5 +1,6 @@
 if(!require(integraFlora)) devtools::load_all()
-library(plantR)
+require(plantR)
+require(parallel)
 
 load("data-tmp/gbif.RData")
 load("data-tmp/reflora.RData")
@@ -54,7 +55,13 @@ save(all_data, file="data-tmp/all_data.RData")
 
 # Apply workflow
 print("Treating data...")
-treated_data <- lapply(all_data, plantRWorkflow, subsetToProvince = T)
+if(PARALLEL) {
+    cl <- makeCluster(CORES)
+    treated_data <- parLapply(cl, all_data, plantRWorkflow_part1, subsetToProvince = T)
+} else {
+    treated_data <- lapply(all_data, plantRWorkflow_part1, subsetToProvince = T)
+}
+treated_data <- lapply(treated_data, plantRWorkflow_part2)
 save(treated_data, file="data-tmp/treated_data.RData")
 
 # Join

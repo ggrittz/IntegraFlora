@@ -1,5 +1,6 @@
 
-plantRWorkflow <- function(x, subsetToProvince = FALSE) {
+
+plantRWorkflow_part1 <- function(x, subsetToProvince = FALSE) {
     # Standardize missing information
     x[x==""] <- NA
 
@@ -9,12 +10,12 @@ plantRWorkflow <- function(x, subsetToProvince = FALSE) {
 
     # Lets format this
     print("Formatting occs")
-    x <- formatOcc(x, noNumb = NA, noYear = NA, noName = NA)
+    x <- plantR::formatOcc(x, noNumb = NA, noYear = NA, noName = NA)
 
     print("Formatting locs")
     if(!exists("COUNTRY")) COUNTRY <- "Brazil"
     if(!exists("STATEPROVINCE")) STATEPROVINCE <- "São Paulo"
-    x <- fixLocation(x)
+    x <- plantR::fixLocation(x)
 
     if(subsetToProvince) {
         print("Subsetting to country...")
@@ -32,7 +33,11 @@ plantRWorkflow <- function(x, subsetToProvince = FALSE) {
 
     # Treat gps data
     print("Formatting coords...")
-    x <- formatCoord(x)
+    x <- plantR::formatCoord(x)
+    x
+}
+
+plantRWorkflow_part2 <- function(x) {
 
     # formatTax and validateTax
     print("Formatting taxonomy...")
@@ -54,18 +59,18 @@ plantRWorkflow <- function(x, subsetToProvince = FALSE) {
 
     # validate
     print("Validating location info...")
-    x <- validateLoc(x)
+    x <- plantR::validateLoc(x)
 
     print("Validating identification info...")
     # validate taxonomist
-    x <- validateTax(x, generalist = T)
+    x <- plantR::validateTax(x, generalist = T)
     x$tax.check <- factor(x$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 
 
     print("Validating geolocation info...")
     map <- latamMap$brazil
     map <- subset(map, NAME_1 == "sao paulo")
-    x <- validateCoord(x, high.map = map) # WORKING
+    x <- plantR::validateCoord(x, high.map = map) # WORKING
     x <- tryAgain(x, function(x) is.na(x$decimalLatitude.new), formatCoord)
     x <- tryAgain(x, function(x) is.na(x$geo.check), validateCoord, high.map=map)
     tab(is.na(x$geo.check))
