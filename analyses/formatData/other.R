@@ -3,7 +3,7 @@ if(!require(integraFlora)) devtools::load_all()
 require(plantR)
 
 # other data
-other_files <- list.files("data-input/Occurrences/OtherSources", pattern = "*.csv", full.names = TRUE)
+other_files <- list.files("data-input/Occurrences/OtherSources", pattern = "*.csv", full.names = TRUE, recursive = TRUE)
 if(length(other_files) > 0) {
     print("Reading other files:")
     print(other_files)
