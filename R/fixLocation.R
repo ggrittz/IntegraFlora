@@ -1,4 +1,14 @@
 
+#' Fix Location
+#'
+#' A more elaborate version of plantR::formatLoc, focused on fixing locations within Brazil, especially in São Paulo.
+#'
+#' @param dt A data.frame treated with plantR::formatDwc() and plantR::formatOcc()
+#' @param selectedCountry The name of a country, usually "Brazil".
+#'
+#' @importFrom utils read.csv
+#' @importFrom plantR formatLoc
+#' @export
 fixLocation <- function(dt, selectedCountry = "Brazil") {
 
     print(paste("Found", nrow(dt), "records."))

@@ -1,8 +1,10 @@
 
-# Which records have not been matched?
+#' Which records have not been matched?
+#' @export
 not_found <- function(x) {
     x$tax.notes == "not found" | grepl("not resolved|+1",x$tax.notes)
 }
+#' @export
 found <- function(x) !not_found(x)
 
 #' getTaxonId
@@ -12,6 +14,7 @@ found <- function(x) !not_found(x)
 #' @param total A data.frame containing identification information with columns "scientificName", "scientificNameAuthorship", "genus"
 #' @param complete Run all possible strategies? If false, will run a default formatTax. Defaults to TRUE
 #' @param rm.miss Remove data with no identification info? Defaults to FALSE
+#' @export
 getTaxonId <- function(total, complete = TRUE, rm.miss = FALSE, na.values = c("Indeterminado", "INDETERMINADA", "ndeterminado", "Indet", "INDET.", "sp.", "Plantae"), ...) {
     # Fix some issues with taxonomy:
 

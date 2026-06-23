@@ -11,6 +11,7 @@
 #' @param baseUrl Start of the URL, lacking the resouce name
 #' @param directory Destination folder
 #' @param filename Destination file
+#' @export
 downloadIPTResource <- function(resource,
                                   baseUrl = "https://ipt.jbrj.gov.br/jabot/resource?r=",
                                   directory = here::here("data-tmp", "JABOT"),
@@ -34,7 +35,7 @@ downloadIPTResource <- function(resource,
 
     # Download and save
     fullname <- file.path(directory, filename)
-    download.file(url = link, destfile = fullname, mode = "wb")
+    utils::download.file(url = link, destfile = fullname, mode = "wb")
 }
 
 openIPTresource <- function(file) {
