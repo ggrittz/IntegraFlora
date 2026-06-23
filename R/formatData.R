@@ -193,5 +193,5 @@ minimumNamesForWorkflow <- c("institutionCode", "collectionCode",
     "country", "stateProvince", "county", "municipality",
     "locality", "decimalLatitude", "decimalLongitude",
     "identifiedBy", "dateIdentified", "typeStatus", "family",
-    "scientificName", "scientificNameAuthorship", "taxonRank")
+    "scientificName", "scientificNameAuthorship", "taxonRank", "geodeticDatum")
 names(minimumNamesForWorkflow) <- minimumNamesForWorkflow
