@@ -172,9 +172,14 @@ formatOccurrence <- function(x) {
         x$county <- NA
     }
 
-    if(any(!plantRMinimumNames %in% names(x))) {
-        warning(paste0("Missing required fields: ", paste(setdiff(plantRMinimumNames, names(x)), collapse=", "), ". This data will be removed"))
+    if(any(!minimumNames %in% names(x))) {
+        warning(paste0("Missing required fields: ", paste(setdiff(minimumNames, names(x)), collapse=", "), ". This data will be removed"))
         return(data.frame())
+    }
+    if(any(!minimumNamesForWorkflow %in% names(x))) {
+        warning(paste0("Missing required fields: ", paste(setdiff(minimumNamesForWorkflow, names(x)), collapse=", "), ". Filling with NA"))
+        miss <- setdiff(minimumNamesForWorkflow, names(x))
+        x[,miss] <- NA
     }
     x <- plantR::formatDwc(user_data = x)
     x <- selectDesiredFields(x)
@@ -182,11 +187,11 @@ formatOccurrence <- function(x) {
     x
 }
 
-
-plantRMinimumNames <- c("institutionCode", "collectionCode",
+minimumNames <- c("scientificName", "locality")
+minimumNamesForWorkflow <- c("institutionCode", "collectionCode",
     "catalogNumber", "recordNumber", "recordedBy", "year",
     "country", "stateProvince", "county", "municipality",
     "locality", "decimalLatitude", "decimalLongitude",
     "identifiedBy", "dateIdentified", "typeStatus", "family",
-    "scientificName", "scientificNameAuthorship")
-names(plantRMinimumNames) <- plantRMinimumNames
+    "scientificName", "scientificNameAuthorship", "taxonRank")
+names(minimumNamesForWorkflow) <- minimumNamesForWorkflow

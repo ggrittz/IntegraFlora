@@ -15,7 +15,7 @@ plantRWorkflow_part1 <- function(x, subsetToProvince = FALSE) {
     print("Formatting locs")
     if(!exists("COUNTRY")) COUNTRY <- "Brazil"
     if(!exists("STATEPROVINCE")) STATEPROVINCE <- "São Paulo"
-    x <- plantR::fixLocation(x)
+    x <- fixLocation(x)
 
     if(subsetToProvince) {
         print("Subsetting to country...")
