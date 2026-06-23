@@ -57,6 +57,7 @@ save(all_data, file="data-tmp/all_data.RData")
 print("Treating data...")
 if(PARALLEL) {
     cl <- makeCluster(CORES)
+    parallel::clusterEvalQ(cl, if(!require(integraFlora)) devtools::load_all())
     treated_data <- parLapply(cl, all_data, plantRWorkflow_part1, subsetToProvince = T)
 } else {
     treated_data <- lapply(all_data, plantRWorkflow_part1, subsetToProvince = T)
